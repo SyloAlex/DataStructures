@@ -5,3 +5,4 @@
 ### 3. Double Lists
 ### 4. Double Circular Lists
 ### 5. Stacks
+### 6. Queues
