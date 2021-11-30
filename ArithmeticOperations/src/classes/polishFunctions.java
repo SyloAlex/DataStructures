@@ -1,0 +1,176 @@
+package classes;
+
+public class polishFunctions {
+    
+    public polishFunctions(){
+    }
+    
+    public String adjustString(String original, HashTable hs){
+        original = original.replaceAll(" ", "");
+        original = original.replaceAll("\\)\\(", ")*(");
+        original = this.numsToVars(original, hs);
+        return original;
+    }
+    
+    public boolean checkNumbers(String original){
+        boolean flag = true;
+        for (int i = 0; i < original.length(); i++){
+            if (Character.isDigit(original.charAt(i))){
+                flag = false;
+                break;
+            }
+        }
+        return flag;
+    }
+    
+    public String numsToVars(String original, HashTable hs){
+        while(!this.checkNumbers(original)){
+            String num = "";
+            char letter;
+            for (int i = 0; i < original.length(); i++){
+                if (Character.isDigit(original.charAt(i)) || 
+                        original.charAt(i) == ',' || original.charAt(i) == '.'){
+                    num += original.charAt(i);
+                } else{
+                    if (num.length() > 0){
+                        break;
+                    }
+                }
+            }
+            if (hs.getNodeCount() >= 0 || hs.getNodeCount() < 27){
+                letter = (char) (65 + hs.getNodeCount());
+            }else{
+                letter = (char) (97 + hs.getNodeCount());
+            }
+            hs.hashFunction(String.valueOf(letter), num);
+            original = original.replaceFirst(num, String.valueOf(letter));
+        }
+        return original;
+    }
+    
+    public String polishCoversion(String original){
+        Stack polishStack = new Stack();
+        String polish = this.convertString(original, polishStack);
+        
+        return polish;
+    }
+    
+    public String convertString(String original, Stack pStack){
+        String polish = "";
+        for (int i = 0; i < original.length(); i++){
+            char pChar = original.charAt(i);
+            if (Character.isDigit(pChar) || Character.isAlphabetic(pChar)){
+                polish += original.charAt(i);
+                if ((i < original.length() - 1) && 
+                        original.charAt(i + 1) == '('){
+                    polish = this.checkStack(original, polish, '*', pStack);
+                }
+            }else{
+                polish = this.checkStack(original, polish, pChar, pStack);
+            }
+        }
+        if (!pStack.isEmpty()){
+            polish = this.emptyStack(polish, pStack);
+        }
+        return polish;
+    }
+    
+    public String checkStack(String original, String polish, char pChar, 
+            Stack pStack){
+        if (pStack.isEmpty()){
+            pStack.stackNode(String.valueOf(pChar));
+        }else{
+            String top = pStack.getTop().getElement();
+            if (pChar == '('){
+                pStack.stackNode(String.valueOf(pChar));
+            } else if (pChar == ')' && !top.equals("(")){
+                polish = this.unstackParenthesis(polish, pStack);
+            } else if(pChar == '^' && top.equals("^")){
+                pStack.stackNode(String.valueOf(pChar));
+            } else if(pChar == '^' && (top.equals("*") || top.equals("/") || 
+                    top.equals("+") || top.equals("-"))){
+                pStack.stackNode(String.valueOf(pChar));
+            } else if((pChar == '*' || pChar == '/') && top.equals("^")){
+                polish = this.unstackSigns(polish, pStack, pChar);
+            } else if ((pChar == '*' || pChar == '/') && 
+                    (top.equals("*") || top.equals("/"))){
+                pStack.stackNode(String.valueOf(pChar));
+            } else if ((pChar == '*' || pChar == '/') && 
+                    (top.equals("+") || top.equals("-"))){
+                pStack.stackNode(String.valueOf(pChar));
+            } else if ((pChar == '+' || pChar == '-') && 
+                    (top.equals("+") || top.equals("-"))){
+                pStack.stackNode(String.valueOf(pChar));
+            } else if ((pChar == '+' || pChar == '-') && 
+                    (top.equals("*") || top.equals("/"))){
+                polish = this.unstackSigns(polish, pStack, pChar);
+            } else if((pChar == '+' || pChar == '-') && top.equals("^")){
+                polish = this.unstackSigns(polish, pStack, pChar);
+            } else if ((pChar == '+' || pChar == '-' || pChar == '*' || 
+                    pChar == '/' || pChar == '^') && top.equals("(")){
+                pStack.stackNode(String.valueOf(pChar));
+            }
+        }
+        return polish;
+    }
+    
+    public String unstackSigns(String polish, Stack pStack, char pChar){
+        if (!pStack.isEmpty()){
+            if (pChar == '+' || pChar == '-'){
+                String sign = pStack.getTop().getElement();
+                if ((sign.equals("*") || sign.equals("/") || sign.equals("^"))){
+                    pStack.unstackNode();
+                    polish += sign;
+                    polish = this.unstackSigns(polish, pStack, pChar);
+                } else if ((sign.equals("+") || sign.equals("-"))){
+                    pStack.unstackNode();
+                    polish += sign;
+                    pStack.stackNode(String.valueOf(pChar));
+                } else{
+                    pStack.stackNode(String.valueOf(pChar));
+                }
+            } else if (pChar == '*' || pChar == '/'){
+                String sign = pStack.getTop().getElement();
+                if (sign.equals("^")){
+                    pStack.unstackNode();
+                    polish += sign;
+                    polish = this.unstackSigns(polish, pStack, pChar);
+                } else if ((sign.equals("*") || sign.equals("/") 
+                        || sign.equals("+") || sign.equals("-"))){
+                    pStack.unstackNode();
+                    polish += sign;
+                    pStack.stackNode(String.valueOf(pChar));
+                }
+            }
+        } else{
+            pStack.stackNode(String.valueOf(pChar));
+        }
+        
+        
+        return polish;
+    }
+    
+    public String unstackParenthesis(String polish, Stack pStack){
+        if (!pStack.getTop().getElement().equals("(")){
+            String sign = pStack.getTop().getElement();
+            pStack.unstackNode();
+            polish += sign;
+            polish = this.unstackParenthesis(polish, pStack);
+        } else{
+            pStack.unstackNode();
+        }
+        return polish;
+    }
+    
+    public String emptyStack(String polish, Stack pStack){
+        if (!pStack.isEmpty()){
+            String sign = pStack.getTop().getElement();
+            pStack.unstackNode();
+            polish += sign;
+            polish = this.emptyStack(polish, pStack);
+        }
+        
+        return polish;
+    }
+    
+}
