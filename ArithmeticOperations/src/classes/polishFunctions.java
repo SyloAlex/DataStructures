@@ -85,26 +85,22 @@ public class polishFunctions {
                 pStack.stackNode(String.valueOf(pChar));
             } else if (pChar == ')' && !top.equals("(")){
                 polish = this.unstackParenthesis(polish, pStack);
-            } else if(pChar == '^' && top.equals("^")){
-                pStack.stackNode(String.valueOf(pChar));
-            } else if(pChar == '^' && (top.equals("*") || top.equals("/") || 
-                    top.equals("+") || top.equals("-"))){
+            } else if(pChar == ')' && top.equals("(")){
+                pStack.unstackNode();
+            } else if(pChar == '^' && (top.equals("^") || top.equals("*") 
+                    || top.equals("/") || top.equals("+") || top.equals("-"))){
                 pStack.stackNode(String.valueOf(pChar));
             } else if((pChar == '*' || pChar == '/') && top.equals("^")){
                 polish = this.unstackSigns(polish, pStack, pChar);
             } else if ((pChar == '*' || pChar == '/') && 
-                    (top.equals("*") || top.equals("/"))){
-                pStack.stackNode(String.valueOf(pChar));
-            } else if ((pChar == '*' || pChar == '/') && 
-                    (top.equals("+") || top.equals("-"))){
+                    (top.equals("+") || top.equals("-") || top.equals("*") || 
+                    top.equals("/"))){
                 pStack.stackNode(String.valueOf(pChar));
             } else if ((pChar == '+' || pChar == '-') && 
                     (top.equals("+") || top.equals("-"))){
                 pStack.stackNode(String.valueOf(pChar));
             } else if ((pChar == '+' || pChar == '-') && 
-                    (top.equals("*") || top.equals("/"))){
-                polish = this.unstackSigns(polish, pStack, pChar);
-            } else if((pChar == '+' || pChar == '-') && top.equals("^")){
+                    (top.equals("*") || top.equals("/") || top.equals("^"))){
                 polish = this.unstackSigns(polish, pStack, pChar);
             } else if ((pChar == '+' || pChar == '-' || pChar == '*' || 
                     pChar == '/' || pChar == '^') && top.equals("(")){
@@ -118,16 +114,23 @@ public class polishFunctions {
         if (!pStack.isEmpty()){
             if (pChar == '+' || pChar == '-'){
                 String sign = pStack.getTop().getElement();
-                if ((sign.equals("*") || sign.equals("/") || sign.equals("^"))){
-                    pStack.unstackNode();
-                    polish += sign;
-                    polish = this.unstackSigns(polish, pStack, pChar);
-                } else if ((sign.equals("+") || sign.equals("-"))){
-                    pStack.unstackNode();
-                    polish += sign;
-                    pStack.stackNode(String.valueOf(pChar));
-                } else{
-                    pStack.stackNode(String.valueOf(pChar));
+                switch (sign) {
+                    case "*":
+                    case "/":
+                    case "^":
+                        pStack.unstackNode();
+                        polish += sign;
+                        polish = this.unstackSigns(polish, pStack, pChar);
+                        break;
+                    case "+":
+                    case "-":
+                        pStack.unstackNode();
+                        polish += sign;
+                        pStack.stackNode(String.valueOf(pChar));
+                        break;
+                    default:
+                        pStack.stackNode(String.valueOf(pChar));
+                        break;
                 }
             } else if (pChar == '*' || pChar == '/'){
                 String sign = pStack.getTop().getElement();
