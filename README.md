@@ -9,3 +9,4 @@
 ### 7. Regular Binary Tree
 ### 8. Binary Search Tree
 ### 9. General Tree
+### 10. Arithmetic Operations with Binary Trees, Stacks and Hash Tables
