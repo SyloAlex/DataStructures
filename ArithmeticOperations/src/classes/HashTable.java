@@ -4,6 +4,7 @@ public class HashTable {
     
     private int size;
     private int nodeCount;
+    private int signCount;
     private HashNode table[];
     
     public HashTable(int size){
@@ -29,6 +30,14 @@ public class HashTable {
 
     public void setNodeCount(int nodeCount) {
         this.nodeCount = nodeCount;
+    }
+    
+    public int getSignCount() {
+        return signCount;
+    }
+
+    public void setSignCount(int signCount) {
+        this.signCount = signCount;
     }
 
     public HashNode[] getTable() {
@@ -88,6 +97,40 @@ public class HashTable {
             HashNode newWord = new HashNode(number, letter);
             this.getTable()[position] = newWord;
             this.nodeCount += 1;
+            return newWord;
+        }
+    }
+    
+    public HashNode hashFunctionSign(String letter, String number){
+        int position = this.hashing(letter);
+        boolean exist = false;
+        if (this.getTable()[position] != null){
+            HashNode aux = this.getTable()[position];
+            boolean flag = false;
+            while (!flag){
+                if (aux.getLetter().equals(letter)){
+                    flag = true;
+                    exist = true;
+                } else{
+                    if (aux.getNext() != null){
+                        aux = aux.getNext();
+                    } else{
+                        flag = true;
+                    }
+                }
+            }
+            if (!exist){
+                HashNode newWord = new HashNode(number, letter);
+                aux.setNext(newWord);
+                this.nodeCount += 1;
+                this.signCount += 1;
+            }
+            return aux;
+        } else{
+            HashNode newWord = new HashNode(number, letter);
+            this.getTable()[position] = newWord;
+            this.nodeCount += 1;
+            this.signCount += 1;
             return newWord;
         }
     }

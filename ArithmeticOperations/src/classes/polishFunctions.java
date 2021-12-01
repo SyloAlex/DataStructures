@@ -9,6 +9,7 @@ public class polishFunctions {
         original = original.replaceAll(" ", "");
         original = original.replaceAll("\\)\\(", ")*(");
         original = this.numsToVars(original, hs);
+        original = this.substituteSigns(original, hs);
         return original;
     }
     
@@ -23,15 +24,82 @@ public class polishFunctions {
         return flag;
     }
     
+    public boolean checkLetters(String original){
+        boolean flag = true;
+        for (int i = 0; i < original.length(); i++){
+            if (original.charAt(i) == 'e' && 
+                        original.charAt(i + 1) == 'x' && 
+                        original.charAt(i + 2) == 'p'){
+                flag = false;
+                break;
+            }
+        }
+        return flag;
+    }
+    
+    public boolean checkSigns(String original){
+        boolean flag = true;
+        for (int i = 0; i < original.length(); i++){
+            if (i > 0){
+                if ((original.charAt(i) == '+' || original.charAt(i) == '-') && 
+                        original.charAt(i - 1) == '('){
+                    flag = false;
+                    break;
+                }
+            } else{
+                if ((original.charAt(i) == '+' || original.charAt(i) == '-')){
+                    flag = false;
+                    break;
+                }
+            }
+        }
+        return flag;
+    }
+    
+    public String substituteSigns(String original, HashTable hs){
+        while(!this.checkSigns(original)){
+            String num = "";
+            char letter;
+            for (int i = 0; i < original.length(); i++){
+                if (i > 0){
+                    if ((original.charAt(i) == '+' || original.charAt(i) == '-') && 
+                            !Character.isAlphabetic(original.charAt(i - 1))){
+                        num += original.charAt(i);
+                        num += original.charAt(i + 1);
+                        break;
+                    }
+                } else{
+                    if ((original.charAt(i) == '+' || original.charAt(i) == '-')){
+                        num += original.charAt(i);
+                        num += original.charAt(i + 1);
+                        break;
+                    }
+                }
+            }
+            if (hs.getNodeCount() >= 0 || hs.getNodeCount() < 27){
+                letter = (char) (65 + hs.getNodeCount());
+            }else{
+                letter = (char) (97 + hs.getNodeCount());
+            }
+            hs.hashFunctionSign(String.valueOf(letter), num);
+            original = original.replaceFirst(num, String.valueOf(letter));
+        }
+        return original;
+    }
+    
     public String numsToVars(String original, HashTable hs){
-        while(!this.checkNumbers(original)){
+        while(!this.checkLetters(original) || !this.checkNumbers(original)){
             String num = "";
             char letter;
             for (int i = 0; i < original.length(); i++){
                 if (Character.isDigit(original.charAt(i)) || 
                         original.charAt(i) == ',' || original.charAt(i) == '.'){
                     num += original.charAt(i);
-                } else{
+                } else if(original.charAt(i) == 'e' && 
+                        original.charAt(i + 1) == 'x' && 
+                        original.charAt(i + 2) == 'p'){
+                    num += "exp";
+                }else{
                     if (num.length() > 0){
                         break;
                     }

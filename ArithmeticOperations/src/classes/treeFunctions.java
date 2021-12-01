@@ -11,6 +11,9 @@ public class treeFunctions {
         if (hs.getNodeCount() > 0){
             this.varsToNums(tree.getRoot(), hs);
         }
+        if (hs.getSignCount() > 0){
+            this.varsToNums(tree.getRoot(), hs);
+        }
         return tree;
     }
     
@@ -40,6 +43,14 @@ public class treeFunctions {
                 HashNode aux = hs.searchLetter(root.getElement());
                 if (aux != null){
                     root.setElement(aux.getNumber());
+                }
+            } else if (root.getElement().length() == 2 && (root.getElement().charAt(0) == '-' || 
+                    root.getElement().charAt(0) == '+')){
+                HashNode aux = hs.searchLetter(
+                        String.valueOf(root.getElement().charAt(1)));
+                if (aux != null){
+                    root.setElement(root.getElement().charAt(0) + 
+                            aux.getNumber());
                 }
             }
             this.varsToNums(root.getRightChild(), hs);
